@@ -20,8 +20,10 @@ git config --global user.eamil xxxx
 3、分支
 git branch [-v]
 git branch branch_name    // 创建分支
+git checkout -b [name]    // 创建新分支并立即切换到新分支
 git branch -d branch_name // 删除分支
 git checkout branch_name  // 切换分支
+// 将分支push到github
 
 4、合并
 // 在branch上修改了东西
@@ -30,6 +32,12 @@ git commit -m "comments"
 // 在master分支下合并
 git merge [有新内容的分支的名称]
 // 最后将master push上去即可
+git push origin test:master // 提交本地test分支作为远程的master分支 //好像只写这一句，远程的github就会自动创建一个test分支
+git push origin test:test   // 提交本地test分支作为远程的test分支
+
+// 如果想删除远程的分支呢？类似于上面，如果:左边的分支为空，那么将删除:右边的远程的分支
+git push origin :test       // 刚提交到远程的test将被删除，但是本地还会保存的，不用担心
+
 
 // 示例：
 chenchen@BG-55 MINGW64 /d/Git/practise (add_protocal)
