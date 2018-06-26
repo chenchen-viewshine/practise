@@ -1,0 +1,78 @@
+0、
+clear
+git status
+git log 
+git log --pretty=oneline
+git reflog
+
+1、
+git clone 
+
+2、设置用户：
+// 当前范围有效
+git config user.name xxxx
+git config user.email xxxx
+
+// 当前登录的操作系统内有效
+git config --global user.name xxxx
+git config --global user.eamil xxxx
+
+3、分支
+git branch [-v]
+git branch branch_name    // 创建分支
+git branch -d branch_name // 删除分支
+git checkout branch_name  // 切换分支
+
+4、合并
+// 在branch上修改了东西
+// 在branch里面将内容commit到master
+git commit -m "comments"
+// 在master分支下合并
+git merge [有新内容的分支的名称]
+// 最后将master push上去即可
+
+// 示例：
+chenchen@BG-55 MINGW64 /d/Git/practise (add_protocal)
+$ git commit -m "merge branch"
+On branch add_protocal
+nothing to commit, working tree clean
+
+chenchen@BG-55 MINGW64 /d/Git/practise (add_protocal)
+$ git checkout master
+Switched to branch 'master'
+Your branch is up to date with 'origin/master'.
+
+chenchen@BG-55 MINGW64 /d/Git/practise (master)
+$ git status
+On branch master
+Your branch is up to date with 'origin/master'.
+
+nothing to commit, working tree clean
+
+chenchen@BG-55 MINGW64 /d/Git/practise (master)
+$ git merge add_protocal
+Updating 8fc6b8c..7e81596
+Fast-forward
+ 111.txt | 327 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 327 insertions(+)
+ create mode 100644 111.txt
+
+chenchen@BG-55 MINGW64 /d/Git/practise (master)
+$ git status
+On branch master
+Your branch is ahead of 'origin/master' by 1 commit.
+  (use "git push" to publish your local commits)
+
+nothing to commit, working tree clean
+
+chenchen@BG-55 MINGW64 /d/Git/practise (master)
+$ git push
+Username for 'https://github.com': chenchen-viewshine
+Total 0 (delta 0), reused 0 (delta 0)
+To https://github.com/chenchen-viewshine/practise.git
+   8fc6b8c..7e81596  master -> master
+
+chenchen@BG-55 MINGW64 /d/Git/practise (master)
+$ git branch -d add_protocal
+Deleted branch add_protocal (was 7e81596).
+
