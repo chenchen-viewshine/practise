@@ -26,12 +26,33 @@ git checkout branch_name  // 切换分支
 // 将分支push到github
 
 4、合并
-// 在branch上修改了东西
+// 在branch上修改了东西、自己add并commit
+chenchen@BG-55 MINGW64 /d/Git/practise (add_git-cmd)
+$ git add git\ cmd.txt
+chenchen@BG-55 MINGW64 /d/Git/practise (add_git-cmd)
+chenchen@BG-55 MINGW64 /d/Git/practise (add_git-cmd)
+$ git commit
+[add_git-cmd 07cbed4] 【修改】git cmd.txt里面新增了内容
+ 1 file changed, 8 insertions(+)
+
 // 在branch里面将内容commit到master
 git commit -m "comments"
 // 在master分支下合并
 git merge [有新内容的分支的名称]
 // 最后将master push上去即可
+git push origin add_protocal
+Username for 'https://github.com': chenchen-viewshine
+Enumerating objects: 4, done.
+Counting objects: 100% (4/4), done.
+Delta compression using up to 3 threads.
+Compressing objects: 100% (3/3), done.
+Writing objects: 100% (3/3), 2.78 KiB | 1.39 MiB/s, done.
+Total 3 (delta 1), reused 0 (delta 0)
+remote: Resolving deltas: 100% (1/1), completed with 1 local object.
+To https://github.com/chenchen-viewshine/practise.git
+ * [new branch]      add_protocal -> add_protocal
+
+
 git push origin test:master // 提交本地test分支作为远程的master分支 //好像只写这一句，远程的github就会自动创建一个test分支
 git push origin test:test   // 提交本地test分支作为远程的test分支
 
