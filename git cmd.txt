@@ -110,3 +110,4 @@ Deleted branch add_protocal (was 7e81596).
 [2019-01-01, 2019-06-30] = PyQt
 [2019-07-01, 2019-12-31] = RTOS
 
+先看完《数学是什么》、再考虑《原本》和《Calculus》
