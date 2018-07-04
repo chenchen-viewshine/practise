@@ -1,4 +1,4 @@
-0、
+﻿0、
 clear
 git status
 git log 
@@ -104,4 +104,9 @@ To https://github.com/chenchen-viewshine/practise.git
 chenchen@BG-55 MINGW64 /d/Git/practise (master)
 $ git branch -d add_protocal
 Deleted branch add_protocal (was 7e81596).
+
+
+[2018-12-31, 2019-01-01] = 系统平台 + GPRS + Modbus + 串口路由器
+[2019-01-01, 2019-06-30] = PyQt
+[2019-07-01, 2019-12-31] = RTOS
 
