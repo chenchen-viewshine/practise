@@ -1,0 +1,33 @@
+--cpu Cortex-M3
+"dtu\stm32f1xx_hal_tim.o"
+"dtu\stm32f1xx_hal_tim_ex.o"
+"dtu\stm32f1xx_hal_flash_ex.o"
+"dtu\stm32f1xx_hal_gpio_ex.o"
+"dtu\stm32f1xx_hal_dma.o"
+"dtu\stm32f1xx_hal_gpio.o"
+"dtu\stm32f1xx_hal_rcc_ex.o"
+"dtu\stm32f1xx_hal.o"
+"dtu\stm32f1xx_hal_rcc.o"
+"dtu\stm32f1xx_hal_cortex.o"
+"dtu\stm32f1xx_hal_pwr.o"
+"dtu\stm32f1xx_hal_flash.o"
+"dtu\stm32f1xx_hal_adc.o"
+"dtu\stm32f1xx_hal_spi_ex.o"
+"dtu\stm32f1xx_hal_adc_ex.o"
+"dtu\stm32f1xx_hal_spi.o"
+"dtu\stm32f1xx_hal_uart.o"
+"dtu\main.o"
+"dtu\stm32f1xx_it.o"
+"dtu\stm32f1xx_hal_msp.o"
+"dtu\array.o"
+"dtu\drv_ec20.o"
+"dtu\drv_wxcmd.o"
+"dtu\usermain.o"
+"dtu\flash_mx25.o"
+"dtu\system_stm32f1xx.o"
+"dtu\startup_stm32f103xb.o"
+--library_type=microlib --strict --scatter "DTU\DTU.sct"
+
+--diag_suppress=L6329 --summary_stderr --info summarysizes --map --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list "DTU.map" -o DTU\DTU.axf
