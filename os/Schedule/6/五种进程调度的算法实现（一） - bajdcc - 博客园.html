@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<!-- saved from url=(0045)https://www.cnblogs.com/bajdcc/p/4707544.html -->
+<html lang="zh-cn"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>五种进程调度的算法实现（一） - bajdcc - 博客园</title>
+<link type="text/css" rel="stylesheet" href="./五种进程调度的算法实现（一） - bajdcc - 博客园_files/blog-common.css">
+<link id="MainCss" type="text/css" rel="stylesheet" href="./五种进程调度的算法实现（一） - bajdcc - 博客园_files/bundle-StylePink.css">
+<link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="./五种进程调度的算法实现（一） - bajdcc - 博客园_files/bundle-StylePink-mobile.css">
+<link title="RSS" type="application/rss+xml" rel="alternate" href="http://www.cnblogs.com/bajdcc/rss">
+<link title="RSD" type="application/rsd+xml" rel="EditURI" href="http://www.cnblogs.com/bajdcc/rsd.xml">
+<link type="application/wlwmanifest+xml" rel="wlwmanifest" href="http://www.cnblogs.com/bajdcc/wlwmanifest.xml">
+<script async="" src="./五种进程调度的算法实现（一） - bajdcc - 博客园_files/analytics.js.下载"></script><script src="./五种进程调度的算法实现（一） - bajdcc - 博客园_files/jquery-2.2.0.min.js.下载"></script>
+<script type="text/javascript">var currentBlogApp = 'bajdcc', cb_enable_mathjax=true;var isLogined=false;</script>
+<script type="text/x-mathjax-config;executed=true">
+    MathJax.Hub.Config({
+        tex2jax: { inlineMath: [['$','$'], ['\\(','\\)']], processClass: 'blogpost-body', processEscapes: true },
+        TeX: { 
+            equationNumbers: { autoNumber: ['AMS'], useLabelIds: true }, extensions: ['extpfeil.js'] },
+            'HTML-CSS': { linebreaks: { automatic: true } },
+            SVG: { linebreaks: { automatic: true } }
+        });
+    </script><script src="./五种进程调度的算法实现（一） - bajdcc - 博客园_files/MathJax.js.下载"></script>
+<script src="./五种进程调度的算法实现（一） - bajdcc - 博客园_files/blog-common.js.下载" type="text/javascript"></script>
+<style type="text/css">.MathJax_Hover_Frame {border-radius: .25em; -webkit-border-radius: .25em; -moz-border-radius: .25em; -khtml-border-radius: .25em; box-shadow: 0px 0px 15px #83A; -webkit-box-shadow: 0px 0px 15px #83A; -moz-box-shadow: 0px 0px 15px #83A; -khtml-box-shadow: 0px 0px 15px #83A; border: 1px solid #A6D ! important; display: inline-block; position: absolute}
+.MathJax_Menu_Button .MathJax_Hover_Arrow {position: absolute; cursor: pointer; display: inline-block; border: 2px solid #AAA; border-radius: 4px; -webkit-border-radius: 4px; -moz-border-radius: 4px; -khtml-border-radius: 4px; font-family: 'Courier New',Courier; font-size: 9px; color: #F0F0F0}
+.MathJax_Menu_Button .MathJax_Hover_Arrow span {display: block; background-color: #AAA; border: 1px solid; border-radius: 3px; line-height: 0; padding: 4px}
+.MathJax_Hover_Arrow:hover {color: white!important; border: 2px solid #CCC!important}
+.MathJax_Hover_Arrow:hover span {background-color: #CCC!important}
+</style><style type="text/css">#MathJax_About {position: fixed; left: 50%; width: auto; text-align: center; border: 3px outset; padding: 1em 2em; background-color: #DDDDDD; color: black; cursor: default; font-family: message-box; font-size: 120%; font-style: normal; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; z-index: 201; border-radius: 15px; -webkit-border-radius: 15px; -moz-border-radius: 15px; -khtml-border-radius: 15px; box-shadow: 0px 10px 20px #808080; -webkit-box-shadow: 0px 10px 20px #808080; -moz-box-shadow: 0px 10px 20px #808080; -khtml-box-shadow: 0px 10px 20px #808080; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+#MathJax_About.MathJax_MousePost {outline: none}
+.MathJax_Menu {position: absolute; background-color: white; color: black; width: auto; padding: 2px; border: 1px solid #CCCCCC; margin: 0; cursor: default; font: menu; text-align: left; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; z-index: 201; box-shadow: 0px 10px 20px #808080; -webkit-box-shadow: 0px 10px 20px #808080; -moz-box-shadow: 0px 10px 20px #808080; -khtml-box-shadow: 0px 10px 20px #808080; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+.MathJax_MenuItem {padding: 2px 2em; background: transparent}
+.MathJax_MenuArrow {position: absolute; right: .5em; padding-top: .25em; color: #666666; font-size: .75em}
+.MathJax_MenuActive .MathJax_MenuArrow {color: white}
+.MathJax_MenuArrow.RTL {left: .5em; right: auto}
+.MathJax_MenuCheck {position: absolute; left: .7em}
+.MathJax_MenuCheck.RTL {right: .7em; left: auto}
+.MathJax_MenuRadioCheck {position: absolute; left: 1em}
+.MathJax_MenuRadioCheck.RTL {right: 1em; left: auto}
+.MathJax_MenuLabel {padding: 2px 2em 4px 1.33em; font-style: italic}
+.MathJax_MenuRule {border-top: 1px solid #CCCCCC; margin: 4px 1px 0px}
+.MathJax_MenuDisabled {color: GrayText}
+.MathJax_MenuActive {background-color: Highlight; color: HighlightText}
+.MathJax_MenuDisabled:focus, .MathJax_MenuLabel:focus {background-color: #E8E8E8}
+.MathJax_ContextMenu:focus {outline: none}
+.MathJax_ContextMenu .MathJax_MenuItem:focus {outline: none}
+#MathJax_AboutClose {top: .2em; right: .2em}
+.MathJax_Menu .MathJax_MenuClose {top: -10px; left: -10px}
+.MathJax_MenuClose {position: absolute; cursor: pointer; display: inline-block; border: 2px solid #AAA; border-radius: 18px; -webkit-border-radius: 18px; -moz-border-radius: 18px; -khtml-border-radius: 18px; font-family: 'Courier New',Courier; font-size: 24px; color: #F0F0F0}
+.MathJax_MenuClose span {display: block; background-color: #AAA; border: 1.5px solid; border-radius: 18px; -webkit-border-radius: 18px; -moz-border-radius: 18px; -khtml-border-radius: 18px; line-height: 0; padding: 8px 0 6px}
+.MathJax_MenuClose:hover {color: white!important; border: 2px solid #CCC!important}
+.MathJax_MenuClose:hover span {background-color: #CCC!important}
+.MathJax_MenuClose:hover:focus {outline: none}
+</style><style type="text/css">.MathJax_Preview .MJXf-math {color: inherit!important}
+</style><style type="text/css">.MJX_Assistive_MathML {position: absolute!important; top: 0; left: 0; clip: rect(1px, 1px, 1px, 1px); padding: 1px 0 0 0!important; border: 0!important; height: 1px!important; width: 1px!important; overflow: hidden!important; display: block!important; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none}
+.MJX_Assistive_MathML.MJX_Assistive_MathML_Block {width: 100%!important}
+</style><style type="text/css">#MathJax_Zoom {position: absolute; background-color: #F0F0F0; overflow: auto; display: block; z-index: 301; padding: .5em; border: 1px solid black; margin: 0; font-weight: normal; font-style: normal; text-align: left; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; -webkit-box-sizing: content-box; -moz-box-sizing: content-box; box-sizing: content-box; box-shadow: 5px 5px 15px #AAAAAA; -webkit-box-shadow: 5px 5px 15px #AAAAAA; -moz-box-shadow: 5px 5px 15px #AAAAAA; -khtml-box-shadow: 5px 5px 15px #AAAAAA; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+#MathJax_ZoomOverlay {position: absolute; left: 0; top: 0; z-index: 300; display: inline-block; width: 100%; height: 100%; border: 0; padding: 0; margin: 0; background-color: white; opacity: 0; filter: alpha(opacity=0)}
+#MathJax_ZoomFrame {position: relative; display: inline-block; height: 0; width: 0}
+#MathJax_ZoomEventTrap {position: absolute; left: 0; top: 0; z-index: 302; display: inline-block; border: 0; padding: 0; margin: 0; background-color: white; opacity: 0; filter: alpha(opacity=0)}
+</style><style type="text/css">.MathJax_Preview {color: #888}
+#MathJax_Message {position: fixed; left: 1em; bottom: 1.5em; background-color: #E6E6E6; border: 1px solid #959595; margin: 0px; padding: 2px 8px; z-index: 102; color: black; font-size: 80%; width: auto; white-space: nowrap}
+#MathJax_MSIE_Frame {position: absolute; top: 0; left: 0; width: 0px; z-index: 101; border: 0px; margin: 0px; padding: 0px}
+.MathJax_Error {color: #CC0000; font-style: italic}
+</style><style type="text/css">.MJXp-script {font-size: .8em}
+.MJXp-right {-webkit-transform-origin: right; -moz-transform-origin: right; -ms-transform-origin: right; -o-transform-origin: right; transform-origin: right}
+.MJXp-bold {font-weight: bold}
+.MJXp-italic {font-style: italic}
+.MJXp-scr {font-family: MathJax_Script,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-frak {font-family: MathJax_Fraktur,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-sf {font-family: MathJax_SansSerif,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-cal {font-family: MathJax_Caligraphic,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-mono {font-family: MathJax_Typewriter,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-largeop {font-size: 150%}
+.MJXp-largeop.MJXp-int {vertical-align: -.2em}
+.MJXp-math {display: inline-block; line-height: 1.2; text-indent: 0; font-family: 'Times New Roman',Times,STIXGeneral,serif; white-space: nowrap; border-collapse: collapse}
+.MJXp-display {display: block; text-align: center; margin: 1em 0}
+.MJXp-math span {display: inline-block}
+.MJXp-box {display: block!important; text-align: center}
+.MJXp-box:after {content: " "}
+.MJXp-rule {display: block!important; margin-top: .1em}
+.MJXp-char {display: block!important}
+.MJXp-mo {margin: 0 .15em}
+.MJXp-mfrac {margin: 0 .125em; vertical-align: .25em}
+.MJXp-denom {display: inline-table!important; width: 100%}
+.MJXp-denom > * {display: table-row!important}
+.MJXp-surd {vertical-align: top}
+.MJXp-surd > * {display: block!important}
+.MJXp-script-box > *  {display: table!important; height: 50%}
+.MJXp-script-box > * > * {display: table-cell!important; vertical-align: top}
+.MJXp-script-box > *:last-child > * {vertical-align: bottom}
+.MJXp-script-box > * > * > * {display: block!important}
+.MJXp-mphantom {visibility: hidden}
+.MJXp-munderover {display: inline-table!important}
+.MJXp-over {display: inline-block!important; text-align: center}
+.MJXp-over > * {display: block!important}
+.MJXp-munderover > * {display: table-row!important}
+.MJXp-mtable {vertical-align: .25em; margin: 0 .125em}
+.MJXp-mtable > * {display: inline-table!important; vertical-align: middle}
+.MJXp-mtr {display: table-row!important}
+.MJXp-mtd {display: table-cell!important; text-align: center; padding: .5em 0 0 .5em}
+.MJXp-mtr > .MJXp-mtd:first-child {padding-left: 0}
+.MJXp-mtr:first-child > .MJXp-mtd {padding-top: 0}
+.MJXp-mlabeledtr {display: table-row!important}
+.MJXp-mlabeledtr > .MJXp-mtd:first-child {padding-left: 0}
+.MJXp-mlabeledtr:first-child > .MJXp-mtd {padding-top: 0}
+.MJXp-merror {background-color: #FFFF88; color: #CC0000; border: 1px solid #CC0000; padding: 1px 3px; font-style: normal; font-size: 90%}
+.MJXp-scale0 {-webkit-transform: scaleX(.0); -moz-transform: scaleX(.0); -ms-transform: scaleX(.0); -o-transform: scaleX(.0); transform: scaleX(.0)}
+.MJXp-scale1 {-webkit-transform: scaleX(.1); -moz-transform: scaleX(.1); -ms-transform: scaleX(.1); -o-transform: scaleX(.1); transform: scaleX(.1)}
+.MJXp-scale2 {-webkit-transform: scaleX(.2); -moz-transform: scaleX(.2); -ms-transform: scaleX(.2); -o-transform: scaleX(.2); transform: scaleX(.2)}
+.MJXp-scale3 {-webkit-transform: scaleX(.3); -moz-transform: scaleX(.3); -ms-transform: scaleX(.3); -o-transform: scaleX(.3); transform: scaleX(.3)}
+.MJXp-scale4 {-webkit-transform: scaleX(.4); -moz-transform: scaleX(.4); -ms-transform: scaleX(.4); -o-transform: scaleX(.4); transform: scaleX(.4)}
+.MJXp-scale5 {-webkit-transform: scaleX(.5); -moz-transform: scaleX(.5); -ms-transform: scaleX(.5); -o-transform: scaleX(.5); transform: scaleX(.5)}
+.MJXp-scale6 {-webkit-transform: scaleX(.6); -moz-transform: scaleX(.6); -ms-transform: scaleX(.6); -o-transform: scaleX(.6); transform: scaleX(.6)}
+.MJXp-scale7 {-webkit-transform: scaleX(.7); -moz-transform: scaleX(.7); -ms-transform: scaleX(.7); -o-transform: scaleX(.7); transform: scaleX(.7)}
+.MJXp-scale8 {-webkit-transform: scaleX(.8); -moz-transform: scaleX(.8); -ms-transform: scaleX(.8); -o-transform: scaleX(.8); transform: scaleX(.8)}
+.MJXp-scale9 {-webkit-transform: scaleX(.9); -moz-transform: scaleX(.9); -ms-transform: scaleX(.9); -o-transform: scaleX(.9); transform: scaleX(.9)}
+.MathJax_PHTML .noError {vertical-align: ; font-size: 90%; text-align: left; color: black; padding: 1px 3px; border: 1px solid}
+</style></head>
+<body><div id="MathJax_Message" style="display: none;"></div>
+<a name="top"></a>
+
+<!--done-->
+<div id="banner">
+<!--done-->
+<div class="header">
+	<div class="headerText">
+		<a id="Header1_HeaderTitle" class="headermaintitle" href="http://www.cnblogs.com/bajdcc/">千里之行，始于足下。</a><br>
+		<div class="headerDis">探索程序的世界</div>
+	</div>
+</div>
+</div>
+<div id="main">
+	<!-- right starts -->
+	<div id="right">
+		<div id="right_content">
+			<div id="mystats">
+				
+					<div id="blog_stats">
+<!--done-->
+<div class="blogStats">
+随笔- 44&nbsp;
+文章- 0&nbsp;
+评论- 3&nbsp;
+
+</div></div>
+				
+			</div>
+			<div id="mylinks">
+<!--done-->
+<a id="blog_nav_sitehome" class="menu" href="http://www.cnblogs.com/">博客园</a>&nbsp;&nbsp;<a id="blog_nav_myhome" class="menu" href="http://www.cnblogs.com/bajdcc/">首页</a>&nbsp;&nbsp;<a id="blog_nav_newpost" class="menu" rel="nofollow" href="https://i.cnblogs.com/EditPosts.aspx?opt=1">新随笔</a>&nbsp;&nbsp;<a id="blog_nav_contact" accesskey="9" class="menu" rel="nofollow" href="https://msg.cnblogs.com/send/bajdcc">联系</a>&nbsp;&nbsp;<a id="blog_nav_admin" class="menu" rel="nofollow" href="https://i.cnblogs.com/">管理</a>&nbsp;&nbsp;<a id="blog_nav_rss" class="menu" href="http://www.cnblogs.com/bajdcc/rss">订阅</a>&nbsp;<a id="blog_nav_rss_image" href="http://www.cnblogs.com/bajdcc/rss"><img src="./五种进程调度的算法实现（一） - bajdcc - 博客园_files/xml.gif" alt="订阅"></a></div>
+			<div id="topics">
+				
+<div id="post_detail">
+<!--done-->
+<div class="post">
+	<div class="postTitle">
+		<a id="cb_post_title_url" class="postTitle2" href="https://www.cnblogs.com/bajdcc/p/4707544.html">五种进程调度的算法实现（一）</a>
+	</div>
+	<div id="cnblogs_post_body" class="blogpost-body"><h3>实验要求</h3>
+<p>1、基于<em><span style="color: #333333;">Event-Driven</span></em>（事件驱动）实现模拟进程调度，包括</p>
+<ul>
+<li><em>最短工作优先（SJF）；</em></li>
+<li><em>最短剩余时间优先（SRTF）；</em></li>
+<li><em>最高响应比优先（HRRF）；</em></li>
+<li><em>优先级调度（Priority）；</em></li>
+<li><em>轮转调度（RR）。</em></li>
+</ul>
+<p>其中，SJF、SRTF为非抢占式调度，其余为抢占式调度。</p>
+<p>2、要求用C语言实现这五种调度算法。（方便起见，引入了C++头文件使用cout进行输出）</p>
+<p>&nbsp;</p>
+<h3>基础知识</h3>
+<h2><strong>一、进程</strong></h2>
+<h4>1.1 进程的含义</h4>
+<p><em><span style="color: #333333;">广义地说，进程是一个具有独立功能的程序关于某个数据集合的一次运行活动。</span></em></p>
+<p>进程是一种抽象的概念，是对程序的抽象。程序是一连串的代码或指令，是静态的东西，就像一本书放在那里。</p>
+<p>那什么时候，程序会“动”起来呢？当然是我们执行了它。比如用鼠标双击Word的快捷方式，那么过一会儿，Word程序就会呈现在你眼前。究其过程，不是“你”执行了程序，而是你让计算机执行了程序。那计算机是怎么执行程序的呢？众所周知，这就要涉及到它的内部，甚至是它的大脑——中央处理器（CPU）了。</p>
+<p>CPU是干什么的呢？CPU就是用来执行特定指令的。上面说道程序就如同一本书，那么CPU的角色就相当于读者，书上的文字相当于指令，CPU“读”了“书”之后，有所感悟，就去做相当的事情，完成相当的任务。</p>
+<p>打个比方，要以书来比喻指令，那么用菜谱来说就再贴切不过了。</p>
+<p>以菜谱为例，比如现在要做一道菜，按照菜谱上的10个步骤来。这里，做菜的时候，首先要准备食材、调料等，这都不是指令是什么回事？其实，计算机中的程序文件（可执行文件）除了包含代码之外，还包含数据，例如应用程序的图标等。接下来，“你”——CPU，就要按照步骤做菜了。做菜途中要等，就得等。一系列步骤下来，最终，一道上好的菜摆在你眼前，色香味俱全。这印证着定义中“具有独立功能”的含义，做一道特色的菜，就是独立完成一种任务。</p>
+<h4>1.2 进程的状态</h4>
+<p>最简单的概括（三态模型）是：<span style="color: #333333;"><em>进程的状态分为——等待态、就绪态、运行态</em>。</span>五态模型比三态模型多了<span style="color: #333333;"><em>新建态</em><span style="color: #000000;">和</span><em>终止态</em></span>。</p>
+<p>以同时炒多道菜为例。进程就相当于炒菜的过程。</p>
+<ul>
+<li>等待态——某道菜可能需要煮、蒸、焖一会儿，这时就需要等待它完成；</li>
+<li>就绪态——某道菜煮、蒸、焖完了，需要你去处理，然而你现在正在做另一道菜，还没来得及切换过来；</li>
+<li>运行态——炒当前的某道菜；</li>
+<li>新建态——正准备做这道菜；</li>
+<li>终止态——这道菜做完了，要做一些收尾工作。</li>
+</ul>
+<h4>1.3 进程的特征</h4>
+<p>进程的特征有四点：<em>动态性、并发性、独立性、异步性。</em></p>
+<p>仍以同时炒多道菜为例。</p>
+<ul>
+<li>动态性——白天炒菜的整个过程，进程是“活”的，因为“你”正在工作。而到了晚上，厨房空无一人，进程是“死”的，厨房内的设施都回到了原位，如同没有人在这里炒过菜一样。进程在一天一夜之间有状态的切换，因此是动态的；</li>
+<li>并发性——你可以同时炒多道菜；</li>
+<li>独立性——你准备的调料是以某道菜的需求而准备的，而不是里面的某块肉。菜谱中的步骤必须按部就班来，不能少不能乱。一种菜谱完成一道菜，不同菜谱完成的菜不同。你炒这道菜的过程不会影响炒那道菜的过程；</li>
+<li>异步性——每道菜被烹饪的过程是间断的（由于是炒多道菜），被中断的时间是未知的。每次炒多道菜的总体时间并不相同，这也体现了炒多道菜的不可预知性。</li>
+</ul>
+<p>以上是我的譬喻，而文字描述是这样的：</p>
+<ul>
+<li>动态性——进程的实质是程序在多道程序系统中的一次执行过程，既然是过程就要有始有终，所以进程会产生、会消亡。进程执行完毕后，一般不会留下关于它运行的一丝痕迹；</li>
+<li>并发性——任何进程都可以同其他进程一起并发执行，并发是任意时刻只有一个程序在运行（要与并行相区别）；</li>
+<li>独立性——进程是一个能独立运行的基本单位，同时也是系统分配资源和调度的独立单位；</li>
+<li>异步性——由于进程间的相互制约，使进程具有执行的间断性，即进程按各自独立的、不可预知的速度向前推进。</li>
+</ul>
+<h4>1.4 进程的调度</h4>
+<p>进程的调度分为抢占式和非抢占式（或剥夺式和非剥夺式）。</p>
+<p>抢占式调度，正如它的名称“抢占”，抢过来自己占用，所以体现有两点——“<strong>抢</strong>”和“<strong>占</strong>”。</p>
+<p>何为抢？依照算法，该任务权重大或者优先级高，自然而然就会“抢”到运行的机会。如果当时时刻系统没有运行其它任务，那么该任务A被运行；如果当时时刻系统正在运行其它任务B，那么依照算法，如果该任务A有“抢”的资格，那就像抢凳子一样，A抢到了，B没有抢到，那么就暂停运行B，开始运行A。</p>
+<p>何为占？任务抢到运行机会（即CPU时间）后，占有相应的运行时间。在这个时间内，系统只运行该任务，直到下一次系统利用算法重新分配任务的运行时间之前。</p>
+<p>因此，正如抢凳子，抢凳子也是一种分配资源的方式，谁体形大、力气大、反应短，抢到的机会就多。在这其中，存在多人抢同一凳子的情况，这就是“竞争”；“好”的凳子，抢的人就多，竞争就越激烈。败者不甘心，想尽快在下次争夺中取胜；胜者保持优势，战略上蔑视败者，但不能自大。</p>
+<p>这里就要说到“<strong>队列</strong>”。假如你要完成一系列的事项，以菜谱为例，一共10个步骤。你现在把这10个步骤写在10个纸片上，然后把它们一个个摞起来，那么当前纸堆的最上面的纸片上就是你当前要做的步骤Step1，你把Step1做完后，把Step1丢弃，那么纸堆顶就是Step2，如此类推，最后剩下Step10，做完之后纸片就全部没有了，此时队列为“空”。</p>
+<p>无论是抢占式还是非抢占式，都要依照这个“队列”中任务的先后顺序来运行它们。所以，队列代表着任务的“生存周期”。只要任务还在队列中，任务就没有“死”，即没有运行结束而消亡；任务就没有“生”，即任务还未开始运行。</p>
+<p>现在，重点就是怎么安排这个队列，这就提到上述五种调度算法了。“调度”，可以看成安排队列的一种方式。</p>
+<p>以队列为基础。抢占式调度意味着某任务A一旦运行之后，可能被其它任务B抢占，现在就要把A移到堆底，把B移到堆顶；非抢占式调度意味着某任务A一旦运行之后，就一直运行A直到结束，期间如果任务B也想要开始运行，就只能把B放在A的下面了，即任务的运行顺序从它们加入队列时就确定了，以后队列的顺序不会更改。</p>
+<h2>二、线程</h2>
+<h4>2.1 线程的含义</h4>
+<p><em>线程是程序执行流的最小单元，是被系统独立调度和分派的基本单位。</em></p>
+<p>如同进程是一种抽象一样，线程也是一种抽象，一种更高度的抽象。原先一个进程只能同时完成一种任务，现在需求多了，促使一个进程要同时完成多个任务，如果没有线程的概念，那么同一进程内的任务只能串行运行（按序运行）。</p>
+<p>现在，把进程也看作一个系统，那么进程的“进程”就是线程了。进程原先作为任务调度的基本单位，与线程相比，进程太“大”了，所以相比较而言，线程的粒度更小。</p>
+<h4>2.2 线程的状态</h4>
+<p>线程的状态与进程的状态一样，也是五态模型，可以参照进程的五态模型。</p>
+<h4>2.3 线程的特点</h4>
+<ul>
+<li>线程是操作系统调度的基本单位；</li>
+<li>线程的状态切换比进程更迅速且开销更小；</li>
+<li>线程不拥有资源，只是任务的一种抽象，同一进程内的线程共享该进程的资源；</li>
+<li>对单核CPU而言，同一时刻只能运行一个线程；</li>
+<li>一个进程至少有一个线程，且是它的主线程。</li>
+</ul>
+<h4>2.4 线程与进程的区别</h4>
+<ul>
+<li>进程之间相互独立（资源的独立），而某一进程的各线程间共享资源（如果不能共享，岂不就与进程没多大区别了）；</li>
+<li>由于进程的独立性，当进程间要相互通信时，系统只能提供各种外部方法，比较繁琐，而线程间的通信可以通过共享数据来实现；</li>
+<li>线程的状态切换比进程更快捷且开销更小；</li>
+<li>在多线程系统中，线程才是可执行对象，因为线程是进程中的并发任务的一种抽象。原先，进程是运行任务的主体，有了线程之后，运行任务的重担就落到了线程身上。</li>
+</ul>
+<h4>2.5 线程的优点</h4>
+<ul>
+<li>充分利用CPU资源（如下的超线程技术会提到这点）；</li>
+<li>实现了进程内并发，使用任务的粒度分得更细，有利于开发人员对任务的分解、抽象（分解与抽象原则）；</li>
+<li>实现了进程内异步事件的处理，尤其是GUI事件、服务端应用等；</li>
+<li>提高了程序的运行效率。</li>
+</ul>
+<h2>三、同步与异步</h2>
+<h4>3.1 同步的含义</h4>
+<p><em><span style="color: #333333;">同步，简单地说，就是调用一个过程时，假如过程还在执行状态，没有返回结果，那么在该过程返回之前，就不能继续做下一件事情。</span></em></p>
+<p>举个例子来说，比如要先穿袜子再穿鞋，顺序不能颠倒，所以我概括同步的特点就是：<strong>顺序性、确定性、简易性</strong>。</p>
+<p>顺序性，就是运行次序不会颠倒错乱，一切按顺序来；</p>
+<p>确定性，就是运行顺序是确定的，可以预见的，就像数学的计算过程一样，最后的答案是确定的；</p>
+<p>简易性，因为同步不牵涉到线程的概念，运行一个简单的单线程程序时，不会用到系统提供的线程同步机制（API）。</p>
+<h4>3.2 异步的含义</h4>
+<p>异步是相对于同步而言的，意思与同步相反。<em><span style="color: #333333;">即调用一个过程时，就接着做下面的事情，不立即获得该过程的返回值。</span></em></p>
+<p>打个比方，用微波炉加热食物，按下“启动”键，微波炉就开始运行了。这时，你不会去苦苦等待它加热，可以做其他的事情。等到听到一声“叮”时，你知道加热完毕了，就会去拿出食物。</p>
+<p>这里涉及到几个细节：你去干别的事、听到“叮”的一声就跑过去。</p>
+<p>你去做别的事，那么现在一共有两件事正在做的过程当中，抽象成线程，就是两个线程在同时运行；</p>
+<p>听到“叮”的一声就跑过去，说明过程返回了，但你并没有苦苦等这个过程返回，这个“返回”是<strong><span style="color: #000000;">巧妙</span></strong>的。</p>
+<p>因此，要实现异步，你得学会做两件事——添加新任务（创建线程），知道旧任务已经结束了并跑去处理（状态、通知和回调）。</p>
+<h4>3.3 实现异步的方法</h4>
+<p>创建线程可以通过调用API来实现，那么怎么知晓旧任务已经运行结束了呢？</p>
+<p><strong>状态</strong>，即设一共享变量（FLAG），旧任务结束时，变量置有效值，之后旧任务结束，新任务循环检测变量是否有效；</p>
+<p><strong>通知</strong>，即像下载软件一样，下载完，系统会通知你，即旧任务向新任务发通知或消息，发完之后，旧任务结束；</p>
+<p><strong>回调</strong>，就是把旧任务做完后要做的收尾工作交给旧任务本身，这样，旧任务做完收尾工作后便结束。</p>
+<p>上述三种方法当中，<strong>“回调”，旧任务与新任务之间没有关系；“通知”，旧任务和新任务有直接联系；“状态”，旧任务和新任务有间接联系，通过状态变量。</strong></p>
+<p>回调时，新任务可以不管旧任务的事情；</p>
+<p>通知时，新任务必须间断地等待是否有通知，如果有通知，就处理它。等待的时候，新任务一般处于<strong>阻塞</strong>状态；</p>
+<p>状态时，新任务不必进行等待操作，它只需要适时检测（判断）这个状态变量是否有效（即是否为有效值）就可以了，这种方法也就是<strong>轮询</strong>。</p>
+<h2>四、并发与并行</h2>
+<h4>4.1 并发的含义</h4>
+<p>当有<span style="color: #ff0000;"><strong>多个进程</strong></span>在运行时，如果系统是<span style="color: #ff0000;"><strong>单核</strong></span>的CPU，那它根本不可能真正地同时运行一个以上的进程。系统只能把CPU运行时间划分成<span style="color: #ff0000;"><strong>若干个时间段</strong></span>（在每个时刻段的起始时刻使用调度算法分配任务），再将每个时间段分配给每个进程执行。在一个时间段内，某进程在运行时，其它进程处于<span style="color: #ff0000;"><strong>挂起状态</strong></span>（就绪状态）。这种方式我们称之为<strong><span style="color: #ff0000;">并发</span></strong>（<em><span style="color: #333333;">Concurrent</span></em>）。</p>
+<p>首先，上述讲到的进程调度就涉及到了进程并发。<strong><span style="color: #000000;">并发的精髓就是分配时间片，微观上是间断的，宏观上是连续的</span></strong>。假如系统一共有26个进程，在一个时间段内，只运行进程A，接着在下一个时间段内运行进程B，直到运行完进程Z，那么所有进程都被运行过了。进程被“重视”的标志就是它的CPU时间，时间多了，运行的就久，进度就越快。当前A-Z的顺序只是一个例子，在真实情况中很少出现这种情况。</p>
+<p>上面的定义中，提到了单核的概念。</p>
+<p><strong>单核</strong>是和<strong>多核</strong>相区分的，可以这么理解，某时刻，单核CPU只能做一个任务，而多核CPU可以做多个任务。任务做的越多，任务的进度就越快速，系统完成任务的效率就高了。</p>
+<p>还有一个概念是<strong>超线程</strong>（<em><span style="color: #333333;">Hyperthreading Technology</span></em>）。</p>
+<p>超线程技术就是通过采用特殊的硬件指令，可以把两个逻辑内核模拟成两个物理超线程芯片，在单处理器中实现线程级的并行计算，同时在相应的软硬件的支持下大幅度提高运行效能，从而实现在单处理器上模拟双处理器的效能。其实，从实质上说，超线程是一种可以将CPU内部暂时闲置处理资源充分“调动”起来的技术。</p>
+<p>虽然采用超线程技术能够同时执行两个线程（如果每个进程同一时刻只能运行它的一个子线程的话，那就等同个能够同时执行两个进程），但它并不像两个真正的CPU那样，每个CPU都具有独立的资源。当两个线程都同时需要某一个资源时，其中一个要暂时停止，并让出资源，直到这些资源闲置后才能继续。因此超线程的性能并不等于两颗CPU的性能。</p>
+<p>超线程与多核的区别主要取决于资源的<strong>独立性</strong>。当运行的这两个线程属于同一进程，那么对于超线程技术，就会遇到两个线程的资源发生冲突的情况；对于多核，就不会发生这种情况，因此两个线程在两个不同的CPU之中运行，纵使它们属于同一进程。</p>
+<h4>4.2 并行的含义</h4>
+<p>当系统有一个以上CPU（即多核）时，则线程的操作有可能不是并发的。当一个CPU执行一个线程时，另一个CPU可以执行另一个线程，<span style="color: #ff0000;"><strong>两个线程</strong></span>互<strong><span style="color: #ff0000;">不抢占</span></strong>CPU资源，可以<span style="color: #ff0000;"><strong>同时进行</strong></span>，这种方式我们称之为<strong><span style="color: #ff0000;">并行</span></strong>（<em><span style="color: #333333;">Parallel</span></em>）。</p>
+<p>并行是多核CPU的概念。并发是微观上间断，宏观上连续，而并行在微观上离“连续”更近了一步。</p>
+<h4>4.3 并发与并行的区别</h4>
+<p>并发与并行这两个概念很容易混淆。</p>
+<p><span style="color: #333333;"><em>并行是指两个或者多个事件在同一时刻发生；并发是指两个或多个事件在同一时间间隔内发生。</em></span></p>
+<p><span style="color: #000000;">并发是单核CPU的产物，微观上间断，宏观上连续；并行是多核CPU的产物，微观上更连续，宏观上更连续。</span></p>
+<p>以数硬币为例，总共一堆硬币。并发是一个人A数，并行是多个人B1-Bn数。</p>
+<p>对A来说。选择一：从头到底埋头数；选择二：将硬币分成大致相同的N份，一会儿数这一份，一会儿数那一份。</p>
+<p>对B来说。B将硬币分成大致相同的N份，因此B有N个人，所以这N个人分别数这N份硬币，由于人多力量大，所以B比A先数完。</p>
+<p>A的选择一即为单道程序，选择二为多道程序即并发；B的选择即并行。</p>
+<ul>
+<li>并行的程序比并发的程序效率高，资源利用率高，但编程更复杂，且结果不可预见，调试困难；</li>
+<li>并行会有对资源的争夺，而并发不会（某时刻只有一个程序独占资源），因而并行会有互斥与同步问题，还有由此导致的死锁问题；</li>
+<li><span style="color: #000000;">并发是单核CPU的产物，微观上间断，宏观上连续；并行是多核CPU的产物，微观上更连续，宏观上更连续。</span></li>
+</ul>
+<h4>4.4 死锁</h4>
+<h5>4.4.1 死锁的定义</h5>
+<p><em><span style="color: #333333;">死锁的规范定义：集合中的每一个进程都在等待只能由本集合中的其他进程才能引发的事件，那么该组进程是死锁的。</span></em></p>
+<h5>4.4.2 死锁发生的四个必要条件</h5>
+<ol>
+<li>
+<p>互斥条件：指进程对所分配到的资源进行<strong>排它性</strong>使用，即在一段时间内某资源只由一个进程占用。如果此时还有其它进程请求资源，则请求者只能<strong>等待</strong>，直至占有资源的进程用毕释放。</p>
+</li>
+<li>
+<p>请求和保持条件：指进程已经保持至少一个资源，但又提出了新的资源请求，而该资源已被其它进程占有，此时请求进程<strong>阻塞</strong>，但又对自己已获得的其它资源<strong>保持不放</strong>。</p>
+</li>
+<li>不剥夺条件：指进程已获得的资源，在未使用完之前，<strong>不能被剥夺</strong>，只能在使用完时由自己释放。</li>
+<li>环路等待条件：指在发生死锁时，必然存在一个进程——<strong>资源的环形链</strong>，即进程集合{P0，P1，P2，···，Pn}中的P0正在等待一个P1占用的资源，P1正在等待P2占用的资源，……，Pn正在等待已被P0占用的资源</li>
+</ol></div><div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+<div id="BlogPostCategory">分类: <a href="http://www.cnblogs.com/bajdcc/category/719983.html" target="_blank">操作系统</a></div>
+<div id="EntryTag">标签: <a href="http://www.cnblogs.com/bajdcc/tag/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a>, <a href="http://www.cnblogs.com/bajdcc/tag/%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6/">进程调度</a>, <a href="http://www.cnblogs.com/bajdcc/tag/%E8%BF%9B%E7%A8%8B/">进程</a>, <a href="http://www.cnblogs.com/bajdcc/tag/%E7%BA%BF%E7%A8%8B/">线程</a>, <a href="http://www.cnblogs.com/bajdcc/tag/%E5%B9%B6%E8%A1%8C/">并行</a>, <a href="http://www.cnblogs.com/bajdcc/tag/%E5%B9%B6%E5%8F%91/">并发</a></div>
+<div id="blog_post_info"><div id="green_channel">
+        <a href="javascript:void(0);" id="green_channel_digg" onclick="DiggIt(4707544,cb_blogId,1);green_channel_success(this,&#39;谢谢推荐！&#39;);">好文要顶</a>
+            <a id="green_channel_follow" onclick="follow(&#39;b584556e-4a3b-e511-b908-9dcfd8948a71&#39;);" href="javascript:void(0);">关注我</a>
+    <a id="green_channel_favorite" onclick="AddToWz(cb_entryId);return false;" href="javascript:void(0);">收藏该文</a>
+    <a id="green_channel_weibo" href="javascript:void(0);" title="分享至新浪微博" onclick="ShareToTsina()"><img src="./五种进程调度的算法实现（一） - bajdcc - 博客园_files/icon_weibo_24.png" alt=""></a>
+    <a id="green_channel_wechat" href="javascript:void(0);" title="分享至微信" onclick="shareOnWechat()"><img src="./五种进程调度的算法实现（一） - bajdcc - 博客园_files/wechat.png" alt=""></a>
+</div>
+<div id="author_profile">
+    <div id="author_profile_info" class="author_profile_info">
+            <a href="http://home.cnblogs.com/u/bajdcc/" target="_blank"><img src="./五种进程调度的算法实现（一） - bajdcc - 博客园_files/20150805182511.png" class="author_avatar" alt=""></a>
+        <div id="author_profile_detail" class="author_profile_info">
+            <a href="http://home.cnblogs.com/u/bajdcc/">bajdcc</a><br>
+            <a href="http://home.cnblogs.com/u/bajdcc/followees">关注 - 0</a><br>
+            <a href="http://home.cnblogs.com/u/bajdcc/followers">粉丝 - 11</a>
+        </div>
+    </div>
+    <div class="clear"></div>
+    <div id="author_profile_honor"></div>
+    <div id="author_profile_follow">
+                <a href="javascript:void(0);" onclick="follow(&#39;b584556e-4a3b-e511-b908-9dcfd8948a71&#39;);return false;">+加关注</a>
+    </div>
+</div>
+<div id="div_digg">
+    <div class="diggit" onclick="votePost(4707544,&#39;Digg&#39;)">
+        <span class="diggnum" id="digg_count">0</span>
+    </div>
+    <div class="buryit" onclick="votePost(4707544,&#39;Bury&#39;)">
+        <span class="burynum" id="bury_count">0</span>
+    </div>
+    <div class="clear"></div>
+    <div class="diggword" id="digg_tips">
+    </div>
+</div>
+<script type="text/javascript">
+    currentDiggType = 0;
+</script></div>
+<div class="clear"></div>
+<div id="post_next_prev"><a href="http://www.cnblogs.com/bajdcc/p/4707746.html" class="p_n_p_prefix">» </a> 下一篇：<a href="http://www.cnblogs.com/bajdcc/p/4707746.html" title="发布于2015-08-06 13:28">五种进程调度的算法实现（二）</a><br></div>
+</div>
+
+
+	<div class="postDesc">posted on <span id="post-date">2015-08-06 11:40</span> <a href="http://www.cnblogs.com/bajdcc/">bajdcc</a> 阅读(<span id="post_view_count">2918</span>) 评论(<span id="post_comment_count">0</span>)  <a href="https://i.cnblogs.com/EditPosts.aspx?postid=4707544" rel="nofollow">编辑</a> <a href="https://www.cnblogs.com/bajdcc/p/4707544.html#" onclick="AddToWz(4707544);return false;">收藏</a></div>
+</div>
+<script type="text/javascript">var allowComments=true,cb_blogId=238811,cb_entryId=4707544,cb_blogApp=currentBlogApp,cb_blogUserGuid='b584556e-4a3b-e511-b908-9dcfd8948a71',cb_entryCreatedDate='2015/8/6 11:40:00';loadViewCount(cb_entryId);var cb_postType=1;</script>
+
+</div><a name="!comments"></a><div id="blog-comments-placeholder"></div><script type="text/javascript">var commentManager = new blogCommentManager();commentManager.renderComments(0);</script>
+<div id="comment_form" class="commentform">
+<a name="commentform"></a>
+<div id="divCommentShow"></div>
+<div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="https://www.cnblogs.com/bajdcc/p/4707544.html#" onclick="return RefreshPage();">刷新页面</a><a href="https://www.cnblogs.com/bajdcc/p/4707544.html#top">返回顶部</a></div>
+<div id="comment_form_container"><div class="login_tips">注册用户登录后才能发表评论，请 <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return login(&#39;commentform&#39;);">登录</a> 或 <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return register();">注册</a>，<a href="http://www.cnblogs.com/">访问</a>网站首页。</div></div>
+<div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+<div id="ad_t2"><a href="http://www.ucancode.com/index.htm" target="_blank">【推荐】超50万VC++源码: 大型组态工控、电力仿真CAD与GIS源码库！</a><br><a href="https://cloud.tencent.com/developer/labs?fromSource=gwzcw.1087957.1087957.1087957" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-T2 - 腾讯云&#39;)">【推荐】如何快速搭建人工智能应用？</a><br><a href="http://challenge.xfyun.cn/?ch=bk" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-xfyun&#39;)">【大赛】2018首届“顶天立地”AI开发者大赛</a><br></div>
+<div id="opt_under_post"></div>
+<div id="cnblogs_c1" class="c_ad_block"><a href="https://cloud.tencent.com/act/campus?fromSource=gwzcw.1087959.1087959.1087959" target="_blank"><img width="300" height="250" src="./五种进程调度的算法实现（一） - bajdcc - 博客园_files/24442-20180710085714894-1703644023.jpg" alt="腾讯云0710" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;C1&#39;);"></a></div>
+<div id="under_post_news"><div class="itnews c_ad_block"><b>最新IT新闻</b>:<br> ·  <a href="https://news.cnblogs.com/n/602157/" target="_blank">搜狗发布史上最难辨别易错词TOP40 一写就错</a><br> ·  <a href="https://news.cnblogs.com/n/602151/" target="_blank">硅光芯片研究新进展：特制纳米线可选择性透射不同颜色的光</a><br> ·  <a href="https://news.cnblogs.com/n/602156/" target="_blank">云计算行业2018年半年报：大局将定，变数仍存，新赛道涌现</a><br> ·  <a href="https://news.cnblogs.com/n/602154/" target="_blank">外媒：为了与腾讯竞争 阿里巴巴应该收购抖音</a><br> ·  <a href="https://news.cnblogs.com/n/602153/" target="_blank">Windows 10平台OneNote更新：部分幸运用户可尝鲜Office功能条</a><br>» <a href="http://news.cnblogs.com/" title="IT新闻" target="_blank">更多新闻...</a></div></div>
+<div id="cnblogs_c2" class="c_ad_block"><a href="http://click.aliyun.com/m/34770/" target="_blank"><img src="./五种进程调度的算法实现（一） - bajdcc - 博客园_files/TB1gBPhgZLJ8KJjy0FnXXcFDpXa-468-60.jpg" alt="" style="width: 468px; height: 60px;"></a></div>
+<div id="under_post_kb"><div class="itnews c_ad_block" id="kb_block"><b>最新知识库文章</b>:<br><div id="kb_recent"> ·  <a href="http://kb.cnblogs.com/page/598963/" target="_blank">危害程序员职业生涯的三大观念</a><br> ·  <a href="http://kb.cnblogs.com/page/601061/" target="_blank">断点单步跟踪是一种低效的调试方法</a><br> ·  <a href="http://kb.cnblogs.com/page/600804/" target="_blank">测试 | 让每一粒尘埃有的放矢</a><br> ·  <a href="http://kb.cnblogs.com/page/599854/" target="_blank">从Excel到微服务</a><br> ·  <a href="http://kb.cnblogs.com/page/522513/" target="_blank">如何提升你的能力？给年轻程序员的几条建议</a><br></div>» <a href="http://kb.cnblogs.com/" target="_blank">更多知识库文章...</a></div></div>
+<div id="HistoryToday" class="c_ad_block"></div>
+<script type="text/javascript">
+    fixPostBody();
+    setTimeout(function () { incrementViewCount(cb_entryId); }, 50);
+    deliverAdT2();
+    deliverAdC1();
+    deliverAdC2();    
+    loadNewsAndKb();
+    loadBlogSignature();
+    LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+    GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+    loadOptUnderPost();
+    GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);   
+</script>
+</div>
+
+
+			</div>
+		</div>
+	</div>
+	<!-- right ends -->
+	<!-- left starts -->
+	<div id="left">
+		<!-- 左侧工具部分 -->
+		<div id="left_content">
+			<div id="calendar"><div id="blog-calendar" style=""><table id="blogCalendar" class="Cal" cellspacing="0" cellpadding="0" title="Calendar">
+	<tbody><tr><td colspan="7"><table class="CalTitle" cellspacing="0">
+		<tbody><tr><td class="CalNextPrev"><a href="javascript:void(0);" onclick="loadBlogCalendar(&#39;2018/06/01&#39;);return false;">&lt;</a></td><td align="center">2018年7月</td><td class="CalNextPrev" align="right"><a href="javascript:void(0);" onclick="loadBlogCalendar(&#39;2018/08/01&#39;);return false;">&gt;</a></td></tr>
+	</tbody></table></td></tr><tr><th class="CalDayHeader" align="center" abbr="日" scope="col">日</th><th class="CalDayHeader" align="center" abbr="一" scope="col">一</th><th class="CalDayHeader" align="center" abbr="二" scope="col">二</th><th class="CalDayHeader" align="center" abbr="三" scope="col">三</th><th class="CalDayHeader" align="center" abbr="四" scope="col">四</th><th class="CalDayHeader" align="center" abbr="五" scope="col">五</th><th class="CalDayHeader" align="center" abbr="六" scope="col">六</th></tr><tr><td class="CalOtherMonthDay" align="center">24</td><td class="CalOtherMonthDay" align="center">25</td><td class="CalOtherMonthDay" align="center">26</td><td class="CalOtherMonthDay" align="center">27</td><td class="CalOtherMonthDay" align="center">28</td><td class="CalOtherMonthDay" align="center">29</td><td class="CalOtherMonthDay" align="center">30</td></tr><tr><td class="CalWeekendDay" align="center">1</td><td align="center">2</td><td align="center">3</td><td align="center">4</td><td align="center">5</td><td align="center">6</td><td class="CalWeekendDay" align="center">7</td></tr><tr><td class="CalWeekendDay" align="center">8</td><td align="center">9</td><td align="center">10</td><td align="center">11</td><td align="center">12</td><td align="center">13</td><td class="CalWeekendDay" align="center">14</td></tr><tr><td class="CalWeekendDay" align="center">15</td><td align="center">16</td><td align="center">17</td><td align="center">18</td><td class="CalTodayDay" align="center">19</td><td align="center">20</td><td class="CalWeekendDay" align="center">21</td></tr><tr><td class="CalWeekendDay" align="center">22</td><td align="center">23</td><td align="center">24</td><td align="center">25</td><td align="center">26</td><td align="center">27</td><td class="CalWeekendDay" align="center">28</td></tr><tr><td class="CalWeekendDay" align="center">29</td><td align="center">30</td><td align="center">31</td><td class="CalOtherMonthDay" align="center">1</td><td class="CalOtherMonthDay" align="center">2</td><td class="CalOtherMonthDay" align="center">3</td><td class="CalOtherMonthDay" align="center">4</td></tr>
+</tbody></table></div><script type="text/javascript">loadBlogDefaultCalendar();</script></div>
+			
+<!--done-->
+<!-- <h1 class="listtitle">公告</h1> -->
+<div class="newsItem">
+	<div id="blog-news"><div id="profile_block">昵称：<a href="https://home.cnblogs.com/u/bajdcc/">bajdcc</a><br>园龄：<a href="https://home.cnblogs.com/u/bajdcc/" title="入园时间：2015-08-05">2年11个月</a><br>粉丝：<a href="https://home.cnblogs.com/u/bajdcc/followers/">11</a><br>关注：<a href="https://home.cnblogs.com/u/bajdcc/followees/">0</a><div id="p_b_follow"><a href="javascript:void(0);" onclick="follow(&#39;b584556e-4a3b-e511-b908-9dcfd8948a71&#39;)">+加关注</a></div><script>getFollowStatus('b584556e-4a3b-e511-b908-9dcfd8948a71')</script></div></div><script type="text/javascript">loadBlogNews();</script>
+</div>
+
+			
+				<div id="leftcontentcontainer">
+					<div id="blog-sidecolumn"><div id="sidebar_search" class="sidebar-block">
+<div id="sidebar_search" class="mySearch">
+<h3 class="catListTitle">搜索</h3>
+<div id="sidebar_search_box">
+<div id="widget_my_zzk" class="div_my_zzk"><input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="input_my_zzk">&nbsp;<input onclick="zzk_go()" type="button" value="找找看" id="btnZzk" class="btn_my_zzk"></div>
+<div id="widget_my_google" class="div_my_zzk"><input type="text" name="google_q" id="google_q" onkeydown="return google_go_enter(event)" class="input_my_zzk">&nbsp;<input onclick="google_go()" type="button" value="谷歌搜索" class="btn_my_zzk"></div>
+</div>
+</div>
+
+</div><div id="sidebar_shortcut" class="sidebar-block">
+<h3 class="catListTitle">常用链接</h3>
+<ul>
+<li><a href="http://www.cnblogs.com/bajdcc/p/" title="我的博客的随笔列表">我的随笔</a></li><li><a href="http://www.cnblogs.com/bajdcc/MyComments.html" title="我发表过的评论列表">我的评论</a></li><li><a href="http://www.cnblogs.com/bajdcc/OtherPosts.html" title="我评论过的随笔列表">我的参与</a></li><li><a href="http://www.cnblogs.com/bajdcc/RecentComments.html" title="我的博客的评论列表">最新评论</a></li><li><a href="http://www.cnblogs.com/bajdcc/tag/" title="我的博客的标签列表">我的标签</a></li>
+</ul>
+<div id="itemListLin_con" style="display:none;">
+
+</div></div><div id="sidebar_recentposts" class="sidebar-block">
+<h3 class="catListTitle">最新随笔</h3>
+<div class="RecentComment" id="RecentPosts">
+<ul style="word-break:break-all">
+<li><a href="http://www.cnblogs.com/bajdcc/p/8973030.html">1. 用C++画光（三）——色散</a></li><li><a href="http://www.cnblogs.com/bajdcc/p/8973024.html">2. 用C++画光（二）——矩形</a></li><li><a href="http://www.cnblogs.com/bajdcc/p/8973017.html">3. 用C++画光（一）——优化</a></li><li><a href="http://www.cnblogs.com/bajdcc/p/8973009.html">4. 简单的图形学（三）——光源</a></li><li><a href="http://www.cnblogs.com/bajdcc/p/8973003.html">5. 简单的图形学（二）——材质与反射</a></li><li><a href="http://www.cnblogs.com/bajdcc/p/8972999.html">6. 简单的图形学（一）</a></li><li><a href="http://www.cnblogs.com/bajdcc/p/8972994.html">7. 【Codewars】7×7 摩天大楼</a></li><li><a href="http://www.cnblogs.com/bajdcc/p/8972992.html">8. 【NOI】9272 偶数个三</a></li><li><a href="http://www.cnblogs.com/bajdcc/p/8972988.html">9. MFC图形编辑器</a></li><li><a href="http://www.cnblogs.com/bajdcc/p/8972975.html">10. 函数式编程</a></li>
+</ul>
+</div>
+</div><div id="sidebar_toptags" class="sidebar-block">
+<h3 class="catListTitle">我的标签</h3>
+<div id="MyTag">
+<ul>
+<li><a href="http://www.cnblogs.com/bajdcc/tag/%E9%80%92%E5%BD%92/">递归</a>(5)</li><li><a href="http://www.cnblogs.com/bajdcc/tag/%E4%BA%8C%E5%8F%89%E6%A0%91/">二叉树</a>(4)</li><li><a href="http://www.cnblogs.com/bajdcc/tag/C%23/">C#</a>(3)</li><li><a href="http://www.cnblogs.com/bajdcc/tag/%E6%A8%A1%E6%8B%9F/">模拟</a>(2)</li><li><a href="http://www.cnblogs.com/bajdcc/tag/%E7%89%A9%E7%90%86%E5%BC%95%E6%93%8E/">物理引擎</a>(2)</li><li><a href="http://www.cnblogs.com/bajdcc/tag/%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6/">进程调度</a>(2)</li><li><a href="http://www.cnblogs.com/bajdcc/tag/%E8%BF%9B%E7%A8%8B%E6%B3%A8%E5%85%A5/">进程注入</a>(1)</li><li><a href="http://www.cnblogs.com/bajdcc/tag/%E5%8F%AF%E8%A7%86%E5%8C%96/">可视化</a>(1)</li><li><a href="http://www.cnblogs.com/bajdcc/tag/%E5%8A%9B%E5%AD%A6/">力学</a>(1)</li><li><a href="http://www.cnblogs.com/bajdcc/tag/%E9%80%BB%E8%BE%91/">逻辑</a>(1)</li><li><a href="http://www.cnblogs.com/bajdcc/tag/">更多</a></li>
+</ul>
+</div></div><div id="sidebar_categories">
+<!--done-->
+
+		<h1 class="catListTitle">随笔分类</h1>
+		
+				<ul class="catList">
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_0" class="listitem" href="https://www.cnblogs.com/bajdcc/category/1208316.html">jMiniLang语言系列(2)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_1" class="listitem" href="https://www.cnblogs.com/bajdcc/category/1208317.html">Toys(3)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_2" class="listitem" href="https://www.cnblogs.com/bajdcc/category/729636.html">Web技术(3)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_3" class="listitem" href="https://www.cnblogs.com/bajdcc/category/719983.html">操作系统(6)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_4" class="listitem" href="https://www.cnblogs.com/bajdcc/category/1208326.html">计算机图形学(6)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_5" class="listitem" href="https://www.cnblogs.com/bajdcc/category/724640.html">数据结构与算法(13)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_6" class="listitem" href="https://www.cnblogs.com/bajdcc/category/728863.html">数值模拟(4)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_7" class="listitem" href="https://www.cnblogs.com/bajdcc/category/1208319.html">刷题(3)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_8" class="listitem" href="https://www.cnblogs.com/bajdcc/category/1208315.html">游戏框架系列(9)</a></li>
+			
+				</ul>
+			
+	
+		<h1 class="catListTitle">随笔档案</h1>
+		
+				<ul class="catList">
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_0" class="listitem" href="https://www.cnblogs.com/bajdcc/archive/2018/04.html">2018年4月 (19)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_1" class="listitem" href="https://www.cnblogs.com/bajdcc/archive/2016/10.html">2016年10月 (3)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_2" class="listitem" href="https://www.cnblogs.com/bajdcc/archive/2016/09.html">2016年9月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_3" class="listitem" href="https://www.cnblogs.com/bajdcc/archive/2016/08.html">2016年8月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_4" class="listitem" href="https://www.cnblogs.com/bajdcc/archive/2015/12.html">2015年12月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_5" class="listitem" href="https://www.cnblogs.com/bajdcc/archive/2015/11.html">2015年11月 (3)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_6" class="listitem" href="https://www.cnblogs.com/bajdcc/archive/2015/09.html">2015年9月 (3)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_7" class="listitem" href="https://www.cnblogs.com/bajdcc/archive/2015/08.html">2015年8月 (13)</a></li>
+			
+				</ul>
+			
+	
+		<h1 class="catListTitle">相册</h1>
+		
+				<ul class="catList">
+			
+				<li class="catListItem"> <a id="CatList_LinkList_2_Link_0" class="listitem" href="https://www.cnblogs.com/bajdcc/gallery/771270.html" rel="nofollow">Prolog(2)</a></li>
+			
+				</ul>
+			
+	
+</div><div id="sidebar_scorerank" class="sidebar-block">
+<h3>积分与排名</h3>
+<ul>
+	<li>
+		积分 -
+		12153
+	</li><li>
+		排名 -
+		33044
+	</li>
+</ul>
+</div><div id="sidebar_recentcomments" class="sidebar-block"><div id="recent_comments_wrap">
+<h3 class="catListTitle">最新评论</h3>
+<div class="RecentComment" id="RecentComments">
+	<div id="RecentCommentsBlock"><ul>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/bajdcc/p/4707746.html#3856455">1. Re:五种进程调度的算法实现（二）</a></li>
+        <li class="recent_comment_body">C的 __FILE__ 和 __LINE__ 这个呢，我不明白，可以给我完整的代码么，谢谢你</li>
+        <li class="recent_comment_author">--_summerflower</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/bajdcc/p/4707746.html#3714008">2. Re:五种进程调度的算法实现（二）</a></li>
+        <li class="recent_comment_body">@astray1234C语言的我已经贴了，C#的在...</li>
+        <li class="recent_comment_author">--bajdcc</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/bajdcc/p/4707746.html#3698974">3. Re:五种进程调度的算法实现（二）</a></li>
+        <li class="recent_comment_body">大神，求源码。</li>
+        <li class="recent_comment_author">--astray1234</li>
+</ul>
+</div>
+</div>
+</div></div><div id="sidebar_topviewedposts" class="sidebar-block"><div id="topview_posts_wrap">
+<h3 class="catListTitle">阅读排行榜</h3>
+<div class="RecentComment" id="TopViewPosts"> 
+	<div id="TopViewPostsBlock"><ul><li><a href="https://www.cnblogs.com/bajdcc/p/4707746.html">1. 五种进程调度的算法实现（二）(4016)</a></li><li><a href="https://www.cnblogs.com/bajdcc/p/4707544.html">2. 五种进程调度的算法实现（一）(2919)</a></li><li><a href="https://www.cnblogs.com/bajdcc/p/5925837.html">3. 制作简单的2D物理引擎（零）(1636)</a></li><li><a href="https://www.cnblogs.com/bajdcc/p/5925922.html">4. 制作简单的2D物理引擎（一）——动力学基础(967)</a></li><li><a href="https://www.cnblogs.com/bajdcc/p/5868125.html">5. 让任务管理器播放动画(554)</a></li></ul></div>
+</div>
+</div></div><div id="sidebar_topcommentedposts" class="sidebar-block"><div id="topfeedback_posts_wrap">
+<h3 class="catListTitle">评论排行榜</h3>
+<div class="RecentComment" id="TopCommentsPosts">
+	<div id="TopFeedbackPostsBlock"><ul><li><a href="https://www.cnblogs.com/bajdcc/p/4707746.html">1. 五种进程调度的算法实现（二）(3)</a></li></ul></div>
+</div></div></div><div id="sidebar_topdiggedposts" class="sidebar-block"><div id="topdigg_posts_wrap">
+<h3 class="catListTitle">推荐排行榜</h3>
+<div class="RecentComment">
+	<div id="TopDiggPostsBlock"><ul><li><a href="https://www.cnblogs.com/bajdcc/p/4707746.html">1. 五种进程调度的算法实现（二）(2)</a></li><li><a href="https://www.cnblogs.com/bajdcc/p/5925922.html">2. 制作简单的2D物理引擎（一）——动力学基础(1)</a></li><li><a href="https://www.cnblogs.com/bajdcc/p/5925837.html">3. 制作简单的2D物理引擎（零）(1)</a></li></ul></div>
+</div></div></div></div><script type="text/javascript">loadBlogSideColumn();</script>
+				</div>
+			
+		</div>
+		<!-- //右侧工具部分 -->
+	</div>
+	<!-- left ends -->	
+	<div class="clear"></div>
+</div>
+<div id="footer">
+	
+<!--done-->
+Copyright ©2018 bajdcc
+</div>
+
+
+
+</body></html>
